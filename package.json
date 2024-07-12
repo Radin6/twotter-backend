@@ -1,0 +1,14 @@
+{
+  "name": "twotter-backend",
+  "version": "1.0.0",
+  "description": "This is a twitter clone",
+  "main": "index.js",
+  "scripts": {
+    "dev": "--watch index.js"
+  },
+  "author": "NicoR",
+  "license": "ISC",
+  "dependencies": {
+    "express": "4.19.2"
+  }
+}
