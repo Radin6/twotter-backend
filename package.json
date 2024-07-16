@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "This is a twitter clone",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev": "--watch index.js"
+    "dev": "node --watch src/index.js"
   },
   "author": "NicoR",
   "license": "ISC",
   "dependencies": {
-    "express": "4.19.2"
+    "dotenv": "^16.4.5",
+    "express": "4.19.2",
+    "mysql2": "^3.10.2"
   }
 }
