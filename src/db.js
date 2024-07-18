@@ -20,13 +20,15 @@ export async function initializeDB() {
     await pool.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_DATABASE}`)
     await pool.query(`USE ${process.env.DB_DATABASE}`)
     await pool.query(`
-        CREATE TABLE IF NOT EXISTS  \`users\`  (
-          id INT AUTO_INCREMENT PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS users (
+          user_id INT AUTO_INCREMENT PRIMARY KEY,
           email VARCHAR(255) NOT NULL,
-          password VARCHAR(255) NOT NULL
+          password VARCHAR(255) NOT NULL,
+          profile_img VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `)
-    console.log(`DB created: ${process.env.DB_DATABASE}`)
+    console.log(`DB initialized: ${process.env.DB_DATABASE}`)
   } catch (error) {
     console.log("error initializing: ", error)
   }
