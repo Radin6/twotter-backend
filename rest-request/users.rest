@@ -1,0 +1,15 @@
+http://localhost:3000/api/users
+
+### Signup
+POST http://localhost:3000/api/users/signup
+Content-Type: application/json
+
+{
+  "email": "hola2@gmail.com",
+  "password": "hola2"
+}
+
+###
+GET http://localhost:3000/api/users/2
+Content-Type: application/json
+Authorization: "Bearer "

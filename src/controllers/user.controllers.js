@@ -1,43 +1,103 @@
 import { pool } from "../db.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
+const getUserByEmail = async (email) => {
+  const [user] = await pool.query('SELECT * FROM users WHERE email=?;', [email])
+  return user;
+}
 
-// Signup user
+const signJWT = (data) => {
+  const {user_id ,email} = data
+
+  const token = jwt.sign({
+    user_id: user_id,
+    email: email
+  },process.env.JWT_SECRET)
+  return token;
+}
+
+export const getUsersAll = async (req, res) => {
+  res.send("all users here")
+}
+
 export const signupUser = async (req, res) => {
-  console.log("req data: ", req.body)
-  // Check if user exists 
-  const user = await pool.query('SELECT * FROM users WHERE email=?;', [req.body.email])
-  if (user[0].length) {
-    console.log("User is: ", user[0])
-    return res.status(501).send("User already exists")
-  }
+  const { password, email } = req.body
 
+  try {
+    // Check if user exists 
+    const myUser = await getUserByEmail(email);
 
-  if (req.body?.email && req.body?.password) {
-
-    try {
-      const [result] = await pool.query(`
-        INSERT INTO users (email, password) VALUES (?, ?)
-      `, [req.body.email, req.body.password]);
-      return res.status(200).send({
-        user_id : result.insertId,
-        email: req.body.email
-      });
-    } catch (error) {
-      console.log("Error trying to signup: ", error)
-      return res.status(500).send("Error trying to signup")
+    if (myUser.length) {
+      return res.status(409).send({ message: "User already exists" })
     }
+
+    // If user and params exists create a new user
+    if (email && password) {
+      // Hash password
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      const [result] = await pool.query(`
+          INSERT INTO users (email, password) VALUES (?, ?)
+        `, [email, hashedPassword]);
+
+      const token = signJWT(result.user_id, email)
+
+      return res.status(201).send({
+        user_id: result.insertId,
+        email: email,
+        token: token
+      });
+
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).send({ message: "Error trying to signup" })
   }
 
-  return res.status(500).send("There is no email or password")
+  return res.status(400).send({ message: "There is no email or password" })
 }
 
-// GET user by id
+export const loginUser = async (req, res) => {
+  const { password, email } = req.body
+
+  try {
+    const user = await getUserByEmail(email)
+    console.log(user)
+    if (!user.length) return res.status(404).send({ message: "User does not exists" })
+    if (password && email) {
+      const [user] = await getUserByEmail(email)
+      const validPassword = bcrypt.compareSync(password, user.password)
+
+      if (!validPassword) return res.status(401).send({message: "Wrong email or password"})
+
+      const token = signJWT(user.user_id, user.email)
+      res.status(200).send({
+        user_id: user.user_id,
+        email: user.email,
+        token: token
+      })
+    }
+  } catch (error) {
+    return res.status(400).send({ message: "Error trying to login" })
+  }
+
+}
+
+export const patchUserbyId = async (req, res) => {
+  res.send("patchUserbyId here")
+}
+
 export const getUserById = async (req, res) => {
-  console.log(req.params)
-  if (req.params?.id) {
-    const [rows] = await pool.query("SELECT id, email FROM users WHERE id=?", [req.params.id]);
-    if (!rows.length) return res.status(404).send({"message":"User not found"});
-    return res.status(200).send(rows[0]);
+  try {
+    if (req.params?.id) {
+      const [rows] = await pool.query("SELECT id, email FROM users WHERE id=?", [req.params.id]);
+      if (!rows.length) return res.status(404).send({ "message": "User not found" });
+      return res.status(200).send(rows[0]);
+    }
+    return res.status(404).send({ message: "User does not exists" })
+  } catch (error) {
+    return res.status(400).send({ message: "Error trying to fetch user by id" })
   }
-  return res.status(500).send("User does not exists")
-}
+
+} 
