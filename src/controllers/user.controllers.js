@@ -7,8 +7,7 @@ const getUserByEmail = async (email) => {
   return user;
 }
 
-const signJWT = (data) => {
-  const {user_id ,email} = data
+const signJWT = (user_id, email) => {
 
   const token = jwt.sign({
     user_id: user_id,
@@ -22,7 +21,12 @@ export const getUsersAll = async (req, res) => {
 }
 
 export const signupUser = async (req, res) => {
-  const { password, email } = req.body
+  const { 
+    password, 
+    email, 
+    profileImg = `https://ui-avatars.com/api/?background=random&name=${email}`
+  } = req.body
+  
 
   try {
     // Check if user exists 
@@ -38,8 +42,8 @@ export const signupUser = async (req, res) => {
       const hashedPassword = bcrypt.hashSync(password, 10);
 
       const [result] = await pool.query(`
-          INSERT INTO users (email, password) VALUES (?, ?)
-        `, [email, hashedPassword]);
+          INSERT INTO users (email, password, profile_img) VALUES (?, ?, ?)
+        `, [email, hashedPassword, profileImg]);
 
       const token = signJWT(result.user_id, email)
 
@@ -63,7 +67,7 @@ export const loginUser = async (req, res) => {
 
   try {
     const user = await getUserByEmail(email)
-    console.log(user)
+
     if (!user.length) return res.status(404).send({ message: "User does not exists" })
     if (password && email) {
       const [user] = await getUserByEmail(email)
