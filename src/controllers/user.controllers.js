@@ -10,7 +10,7 @@ const getUserByEmail = async (email) => {
 const signJWT = (user_id, email) => {
 
   const token = jwt.sign({
-    user_id: user_id,
+    userId: user_id,
     email: email
   },process.env.JWT_SECRET)
   return token;
@@ -48,9 +48,10 @@ export const signupUser = async (req, res) => {
       const token = signJWT(result.user_id, email)
 
       return res.status(201).send({
-        user_id: result.insertId,
+        userId: result.insertId,
         email: email,
-        token: token
+        token: token,
+        profileImg: profileImg,
       });
 
     }
@@ -77,8 +78,9 @@ export const loginUser = async (req, res) => {
 
       const token = signJWT(user.user_id, user.email)
       res.status(200).send({
-        user_id: user.user_id,
+        userId: user.user_id,
         email: user.email,
+        profileImg: user.profile_img,
         token: token
       })
     }

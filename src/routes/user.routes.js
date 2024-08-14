@@ -5,10 +5,10 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router()
 
-// POST signup - Public ✅
+// POST signup /api/users/signup - Public ✅
 router.post("/signup", signupUser)
 
-// POST login - Public ✅
+// POST login /api/users/login - Public ✅
 router.post("/login", loginUser)
 
 // NOW NOT IMPLEMENTED ////////////////
